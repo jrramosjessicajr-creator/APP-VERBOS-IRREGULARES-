@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verboteca — treino de past &amp; past participle</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --felt: #1f2e28;
+    --felt-dark: #16211c;
+    --card: #f4ecd8;
+    --card-shadow: #d8cbaa;
+    --ink: #2b2118;
+    --rust: #b23a2f;
+    --rust-dark: #8a2c23;
+    --brass: #c9a227;
+    --green-ok: #3e6b4f;
+    --paper-line: rgba(43,33,24,0.12);
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at top, #24352d 0%, var(--felt) 55%, var(--felt-dark) 100%);
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--card);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 32px 16px 60px;
+  }
+
+  .drawer-label{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-style:italic;
+    letter-spacing:0.5px;
+    color: var(--brass);
+    font-size: 13px;
+    text-transform: uppercase;
+    border: 1px solid rgba(201,162,39,0.5);
+    padding: 4px 14px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+  }
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: 2.6rem;
+    margin: 0 0 4px;
+    text-align:center;
+    letter-spacing: -0.5px;
+  }
+  h1 em{ color: var(--rust); font-style: italic; }
+
+  .subtitle{
+    color: #b9c9bd;
+    font-size: 0.85rem;
+    margin-bottom: 28px;
+    text-align:center;
+    max-width: 480px;
+    line-height:1.5;
+  }
+
+  .stats-row{
+    display:flex;
+    gap: 14px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    justify-content:center;
+  }
+  .stat{
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-size: 0.72rem;
+    text-align:center;
+    min-width: 74px;
+  }
+  .stat .n{ display:block; font-family:'Fraunces', serif; font-size:1.3rem; font-weight:700; color: var(--brass); line-height:1.1; }
+  .stat .l{ text-transform:uppercase; letter-spacing: 0.06em; color:#9db3a4; }
+
+  .stage{
+    perspective: 1400px;
+    width: 100%;
+    max-width: 460px;
+  }
+
+  .card{
+    position:relative;
+    background: var(--card);
+    color: var(--ink);
+    border-radius: 6px;
+    padding: 34px 30px 26px;
+    box-shadow:
+      0 2px 0 var(--card-shadow),
+      0 18px 40px -10px rgba(0,0,0,0.55);
+    min-height: 300px;
+    display:flex;
+    flex-direction:column;
+    transition: transform 0.15s ease;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:14px; left: 50%;
+    transform: translateX(-50%);
+    width: 40px; height: 40px;
+    background: radial-gradient(circle, var(--felt-dark) 0 45%, transparent 46%);
+    opacity:0.9;
+  }
+  .card::after{
+    content:"";
+    position:absolute;
+    top: 46px; left:0; right:0; bottom: 0;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px, transparent 31px,
+      var(--paper-line) 32px
+    );
+    border-radius: 0 0 6px 6px;
+    pointer-events:none;
+  }
+
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #8a7a5c;
+    margin-top: 26px;
+    z-index:1;
+  }
+  .deck-count{ font-weight:600; }
+
+  .prompt{
+    z-index:1;
+    margin: 22px 0 6px;
+  }
+  .prompt .to{
+    font-family:'Fraunces', serif;
+    font-style: italic;
+    color: var(--rust);
+    font-size: 1rem;
+  }
+  .prompt .verb{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: 2.4rem;
+    line-height:1.05;
+    margin: 2px 0 6px;
+  }
+  .prompt .pt{
+    font-size: 0.85rem;
+    color: #6b5d43;
+  }
+
+  .fields{
+    z-index:1;
+    margin-top: 18px;
+    display:flex;
+    flex-direction:column;
+    gap: 12px;
+  }
+  .field-row{ display:flex; align-items:center; gap: 10px; }
+  .field-row label{
+    width: 96px;
+    flex-shrink:0;
+    font-size: 0.68rem;
+    text-transform:uppercase;
+    letter-spacing: 0.06em;
+    color: #6b5d43;
+  }
+  .field-row input{
+    flex:1;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px dotted rgba(43,33,24,0.35);
+    padding: 4px 2px;
+    color: var(--ink);
+    outline: none;
+  }
+  .field-row input:focus{ border-bottom-color: var(--rust); }
+  .field-row.ok input{ border-bottom-color: var(--green-ok); color: var(--green-ok); }
+  .field-row.bad input{ border-bottom-color: var(--rust); color: var(--rust-dark); }
+  .field-row .correction{
+    font-size: 0.72rem;
+    color: var(--rust-dark);
+    min-width: 90px;
+  }
+
+  .card-actions{
+    z-index:1;
+    margin-top: 20px;
+    display:flex;
+    gap: 10px;
+  }
+  button{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: none;
+    border-radius: 3px;
+    padding: 11px 18px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .btn-check{ background: var(--felt-dark); color: var(--card); flex:1; }
+  .btn-check:hover{ background:#0f1712; }
+  .btn-next{ background: var(--rust); color: var(--card); flex:1; display:none; }
+  .btn-next.show{ display:block; }
+  .btn-check.hide{ display:none; }
+
+  .stamp{
+    position:absolute;
+    top: 96px; right: 26px;
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-style: italic;
+    font-size: 1.05rem;
+    border: 3px solid var(--rust);
+    color: var(--rust);
+    padding: 4px 10px;
+    border-radius: 4px;
+    transform: rotate(-14deg) scale(0);
+    opacity:0;
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
+    z-index:2;
+    pointer-events:none;
+  }
+  .stamp.ok{ border-color: var(--green-ok); color: var(--green-ok); }
+  .stamp.show{ transform: rotate(-14deg) scale(1); opacity: 0.92; }
+
+  .bottom-controls{
+    margin-top: 22px;
+    display:flex;
+    gap: 12px;
+    align-items:center;
+  }
+  .link-btn{
+    background:none;
+    border: none;
+    color: #9db3a4;
+    font-size: 0.72rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor:pointer;
+    letter-spacing: 0.03em;
+  }
+  .link-btn:hover{ color: var(--brass); }
+
+  .summary{
+    text-align:center;
+  }
+  .summary h2{
+    font-family:'Fraunces', serif;
+    font-size: 1.7rem;
+    margin: 4px 0 4px;
+  }
+  .summary p{ color:#6b5d43; font-size:0.85rem; margin: 0 0 20px; }
+
+  kbd{
+    background: rgba(0,0,0,0.3);
+    border-radius:3px;
+    padding: 1px 6px;
+    font-size: 0.65rem;
+  }
+
+  @media (max-width: 420px){
+    h1{ font-size: 2rem; }
+    .prompt .verb{ font-size: 1.9rem; }
+    .field-row label{ width: 78px; font-size: 0.62rem; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="drawer-label">Gaveta 07 — Verbos Irregulares</div>
+  <h1>Verbo<em>teca</em></h1>
+  <p class="subtitle">Cada carta é um verbo. Preencha o <strong>past</strong> e o <strong>past participle</strong> antes de arquivar a carta de volta.</p>
+
+  <div class="stats-row">
+    <div class="stat"><span class="n" id="stat-score">0</span><span class="l">pontos</span></div>
+    <div class="stat"><span class="n" id="stat-streak">0</span><span class="l">sequência</span></div>
+    <div class="stat"><span class="n" id="stat-acc">—</span><span class="l">acerto</span></div>
+    <div class="stat"><span class="n" id="stat-lap">1</span><span class="l">volta</span></div>
+  </div>
+
+  <div class="stage">
+    <div class="card" id="card">
+
+      <div class="stamp" id="stamp">CORRETO</div>
+
+      <div class="card-top">
+        <span id="card-index">CARTA 01</span>
+        <span class="deck-count" id="deck-count">01 / 50</span>
+      </div>
+
+      <div id="quiz-view">
+        <div class="prompt">
+          <div class="to">to</div>
+          <div class="verb" id="verb-inf">go</div>
+          <div class="pt" id="verb-pt">ir</div>
+        </div>
+
+        <div class="fields">
+          <div class="field-row" id="row-past">
+            <label>Past</label>
+            <input type="text" id="input-past" autocomplete="off" spellcheck="false" placeholder="…">
+            <span class="correction" id="corr-past"></span>
+          </div>
+          <div class="field-row" id="row-pp">
+            <label>Past Part.</label>
+            <input type="text" id="input-pp" autocomplete="off" spellcheck="false" placeholder="…">
+            <span class="correction" id="corr-pp"></span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn-check" id="btn-check">Conferir</button>
+          <button class="btn-next" id="btn-next">Próxima carta →</button>
+        </div>
+      </div>
+
+      <div id="summary-view" style="display:none;" class="summary">
+        <h2>Gaveta arquivada.</h2>
+        <p id="summary-text">Você revisou o fichário inteiro.</p>
+        <button class="btn-check" id="btn-restart" style="width:100%;">Embaralhar de novo</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="bottom-controls">
+    <button class="link-btn" id="btn-shuffle">embaralhar gaveta</button>
+    <span style="color:#4a5a51;">·</span>
+    <button class="link-btn" id="btn-hint">dica</button>
+    <span style="color:#4a5a51;">·</span>
+    <span style="color:#6b8074; font-size:0.72rem;"><kbd>Enter</kbd> confere</span>
+  </div>
+
+<script>
+(function(){
+  const VERBS = [
+    ["arise","arose","arisen","surgir"],
+    ["awake","awoke","awoken","acordar"],
+    ["be","was/were","been","ser / estar"],
+    ["bear","bore","born/borne","suportar / dar à luz"],
+    ["beat","beat","beaten","bater"],
+    ["become","became","become","tornar-se"],
+    ["begin","began","begun","começar"],
+    ["bend","bent","bent","dobrar"],
+    ["bet","bet","bet","apostar"],
+    ["bind","bound","bound","amarrar"],
+    ["bite","bit","bitten","morder"],
+    ["bleed","bled","bled","sangrar"],
+    ["blow","blew","blown","soprar"],
+    ["break","broke","broken","quebrar"],
+    ["breed","bred","bred","criar (animais)"],
+    ["bring","brought","brought","trazer"],
+    ["broadcast","broadcast","broadcast","transmitir"],
+    ["build","built","built","construir"],
+    ["burn","burnt/burned","burnt/burned","queimar"],
+    ["burst","burst","burst","estourar"],
+    ["buy","bought","bought","comprar"],
+    ["cast","cast","cast","lançar"],
+    ["catch","caught","caught","pegar / capturar"],
+    ["choose","chose","chosen","escolher"],
+    ["cling","clung","clung","agarrar-se"],
+    ["come","came","come","vir"],
+    ["cost","cost","cost","custar"],
+    ["creep","crept","crept","rastejar"],
+    ["cut","cut","cut","cortar"],
+    ["deal","dealt","dealt","lidar"],
+    ["dig","dug","dug","cavar"],
+    ["dive","dove/dived","dived","mergulhar"],
+    ["do","did","done","fazer"],
+    ["draw","drew","drawn","desenhar"],
+    ["dream","dreamt/dreamed","dreamt/dreamed","sonhar"],
+    ["drink","drank","drunk","beber"],
+    ["drive","drove","driven","dirigir"],
+    ["eat","ate","eaten","comer"],
+    ["fall","fell","fallen","cair"],
+    ["feed","fed","fed","alimentar"],
+    ["feel","felt","felt","sentir"],
+    ["fight","fought","fought","lutar"],
+    ["find","found","found","encontrar"],
+    ["flee","fled","fled","fugir"],
+    ["fling","flung","flung","arremessar"],
+    ["fly","flew","flown","voar"],
+    ["forbid","forbade","forbidden","proibir"],
+    ["forecast","forecast","forecast","prever"],
+    ["forget","forgot","forgotten","esquecer"],
+    ["forgive","forgave","forgiven","perdoar"],
+    ["freeze","froze","frozen","congelar"],
+    ["get","got","gotten","conseguir / pegar"],
+    ["give","gave","given","dar"],
+    ["go","went","gone","ir"],
+    ["grind","ground","ground","moer"],
+    ["grow","grew","grown","crescer"],
+    ["hang","hung","hung","pendurar"],
+    ["have","had","had","ter"],
+    ["hear","heard","heard","ouvir"],
+    ["hide","hid","hidden","esconder"],
+    ["hit","hit","hit","bater / acertar"],
+    ["hold","held","held","segurar"],
+    ["hurt","hurt","hurt","machucar"],
+    ["keep","kept","kept","manter"],
+    ["kneel","knelt/kneeled","knelt/kneeled","ajoelhar"],
+    ["knit","knit/knitted","knit/knitted","tricotar"],
+    ["know","knew","known","saber / conhecer"],
+    ["lay","laid","laid","colocar / deitar algo"],
+    ["lead","led","led","liderar"],
+    ["lean","leant/leaned","leant/leaned","inclinar"],
+    ["leap","leapt/leaped","leapt/leaped","saltar"],
+    ["learn","learnt/learned","learnt/learned","aprender"],
+    ["leave","left","left","deixar / partir"],
+    ["lend","lent","lent","emprestar"],
+    ["let","let","let","deixar / permitir"],
+    ["lie","lay","lain","deitar-se"],
+    ["light","lit/lighted","lit/lighted","acender"],
+    ["lose","lost","lost","perder"],
+    ["make","made","made","fazer / criar"],
+    ["mean","meant","meant","significar"],
+    ["meet","met","met","encontrar / conhecer"],
+    ["mistake","mistook","mistaken","confundir"],
+    ["mow","mowed","mown/mowed","cortar grama"],
+    ["overcome","overcame","overcome","superar"],
+    ["overtake","overtook","overtaken","ultrapassar"],
+    ["pay","paid","paid","pagar"],
+    ["prove","proved","proven/proved","provar"],
+    ["put","put","put","colocar"],
+    ["quit","quit","quit","desistir / parar"],
+    ["read","read","read","ler"],
+    ["rid","rid","rid","livrar"],
+    ["ride","rode","ridden","andar (bike / cavalo)"],
+    ["ring","rang","rung","tocar (campainha)"],
+    ["rise","rose","risen","levantar-se / subir"],
+    ["run","ran","run","correr"],
+    ["saw","sawed","sawn/sawed","serrar"],
+    ["say","said","said","dizer"],
+    ["see","saw","seen","ver"],
+    ["seek","sought","sought","buscar"],
+    ["sell","sold","sold","vender"],
+    ["send","sent","sent","enviar"],
+    ["set","set","set","definir / colocar"],
+    ["sew","sewed","sewn/sewed","costurar"],
+    ["shake","shook","shaken","sacudir"],
+    ["shed","shed","shed","derramar"],
+    ["shine","shone/shined","shone/shined","brilhar"],
+    ["shoot","shot","shot","atirar"],
+    ["show","showed","shown","mostrar"],
+    ["shrink","shrank","shrunk","encolher"],
+    ["shut","shut","shut","fechar"],
+    ["sing","sang","sung","cantar"],
+    ["sink","sank","sunk","afundar"],
+    ["sit","sat","sat","sentar"],
+    ["sleep","slept","slept","dormir"],
+    ["slide","slid","slid","deslizar"],
+    ["sling","slung","slung","lançar"],
+    ["slit","slit","slit","cortar (fenda)"],
+    ["smell","smelt/smelled","smelt/smelled","cheirar"],
+    ["sow","sowed","sown/sowed","semear"],
+    ["speak","spoke","spoken","falar"],
+    ["speed","sped/speeded","sped/speeded","acelerar"],
+    ["spell","spelt/spelled","spelt/spelled","soletrar"],
+    ["spend","spent","spent","gastar"],
+    ["spill","spilt/spilled","spilt/spilled","derramar"],
+    ["spin","spun","spun","girar"],
+    ["spit","spat","spat","cuspir"],
+    ["split","split","split","dividir"],
+    ["spoil","spoilt/spoiled","spoilt/spoiled","estragar"],
+    ["spread","spread","spread","espalhar"],
+    ["spring","sprang","sprung","saltar"],
+    ["stand","stood","stood","ficar em pé"],
+    ["steal","stole","stolen","roubar"],
+    ["stick","stuck","stuck","grudar"],
+    ["sting","stung","stung","picar"],
+    ["stink","stank","stunk","feder"],
+    ["strike","struck","struck","atingir / greve"],
+    ["strive","strove","striven","esforçar-se"],
+    ["swear","swore","sworn","jurar"],
+    ["sweep","swept","swept","varrer"],
+    ["swell","swelled","swollen","inchar"],
+    ["swim","swam","swum","nadar"],
+    ["swing","swung","swung","balançar"],
+    ["take","took","taken","pegar / levar"],
+    ["teach","taught","taught","ensinar"],
+    ["tear","tore","torn","rasgar"],
+    ["tell","told","told","contar"],
+    ["think","thought","thought","pensar"],
+    ["throw","threw","thrown","jogar / lançar"],
+    ["thrust","thrust","thrust","empurrar"],
+    ["tread","trod","trodden","pisar"],
+    ["understand","understood","understood","entender"],
+    ["undo","undid","undone","desfazer"],
+    ["upset","upset","upset","chatear"],
+    ["wake","woke","woken","acordar"],
+    ["wear","wore","worn","vestir"],
+    ["weave","wove","woven","tecer"],
+    ["weep","wept","wept","chorar"],
+    ["wet","wet/wetted","wet/wetted","molhar"],
+    ["win","won","won","ganhar / vencer"],
+    ["wind","wound","wound","enrolar"],
+    ["withdraw","withdrew","withdrawn","retirar"],
+    ["wring","wrung","wrung","torcer"],
+    ["write","wrote","written","escrever"]
+  ];
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  let deck = shuffle(VERBS);
+  let idx = 0;
+  let lap = 1;
+  let score = 0;
+  let streak = 0;
+  let answered = 0;
+  let correctCount = 0;
+  let checked = false;
+
+  const el = {
+    verbInf: document.getElementById('verb-inf'),
+    verbPt: document.getElementById('verb-pt'),
+    inputPast: document.getElementById('input-past'),
+    inputPP: document.getElementById('input-pp'),
+    rowPast: document.getElementById('row-past'),
+    rowPP: document.getElementById('row-pp'),
+    corrPast: document.getElementById('corr-past'),
+    corrPP: document.getElementById('corr-pp'),
+    btnCheck: document.getElementById('btn-check'),
+    btnNext: document.getElementById('btn-next'),
+    statScore: document.getElementById('stat-score'),
+    statStreak: document.getElementById('stat-streak'),
+    statAcc: document.getElementById('stat-acc'),
+    statLap: document.getElementById('stat-lap'),
+    cardIndex: document.getElementById('card-index'),
+    deckCount: document.getElementById('deck-count'),
+    stamp: document.getElementById('stamp'),
+    quizView: document.getElementById('quiz-view'),
+    summaryView: document.getElementById('summary-view'),
+    summaryText: document.getElementById('summary-text'),
+    btnRestart: document.getElementById('btn-restart'),
+    btnShuffle: document.getElementById('btn-shuffle'),
+    btnHint: document.getElementById('btn-hint')
+  };
+
+  function norm(s){
+    return s.trim().toLowerCase().replace(/\s+/g,' ');
+  }
+
+  function matchesAny(input, answer){
+    // answer may contain "was/were" or "gotten" alternatives separated by "/"
+    const options = answer.split('/').map(norm);
+    return options.includes(norm(input));
+  }
+
+  function loadCard(){
+    checked = false;
+    el.stamp.classList.remove('show','ok');
+    el.inputPast.value = '';
+    el.inputPP.value = '';
+    el.rowPast.classList.remove('ok','bad');
+    el.rowPP.classList.remove('ok','bad');
+    el.corrPast.textContent = '';
+    el.corrPP.textContent = '';
+    el.btnCheck.classList.remove('hide');
+    el.btnNext.classList.remove('show');
+    el.inputPast.disabled = false;
+    el.inputPP.disabled = false;
+
+    const v = deck[idx];
+    el.verbInf.textContent = v[0];
+    el.verbPt.textContent = v[3];
+    el.cardIndex.textContent = 'CARTA ' + String(idx+1).padStart(2,'0');
+    el.deckCount.textContent = String(idx+1).padStart(2,'0') + ' / ' + String(deck.length).padStart(2,'0');
+    el.inputPast.focus();
+  }
+
+  function updateStats(){
+    el.statScore.textContent = score;
+    el.statStreak.textContent = streak;
+    el.statAcc.textContent = answered ? Math.round((correctCount/answered)*100) + '%' : '—';
+    el.statLap.textContent = lap;
+  }
+
+  function checkAnswer(){
+    if(checked) return;
+    checked = true;
+    const v = deck[idx];
+    const pastOk = matchesAny(el.inputPast.value, v[1]);
+    const ppOk = matchesAny(el.inputPP.value, v[2]);
+    const bothOk = pastOk && ppOk;
+
+    el.rowPast.classList.add(pastOk ? 'ok' : 'bad');
+    el.rowPP.classList.add(ppOk ? 'ok' : 'bad');
+    if(!pastOk) el.corrPast.textContent = '→ ' + v[1];
+    if(!ppOk) el.corrPP.textContent = '→ ' + v[2];
+
+    answered++;
+    if(bothOk){
+      correctCount++;
+      streak++;
+      score += 10 + Math.min(streak, 10);
+      el.stamp.textContent = 'CORRETO';
+      el.stamp.classList.add('ok');
+    } else {
+      streak = 0;
+      el.stamp.textContent = 'REVISAR';
+    }
+    el.stamp.classList.add('show');
+    updateStats();
+
+    el.inputPast.disabled = true;
+    el.inputPP.disabled = true;
+    el.btnCheck.classList.add('hide');
+    el.btnNext.classList.add('show');
+    el.btnNext.focus();
+  }
+
+  function nextCard(){
+    idx++;
+    if(idx >= deck.length){
+      lap++;
+      idx = 0;
+      deck = shuffle(VERBS);
+      updateStats();
+    }
+    loadCard();
+  }
+
+  function restart(){
+    deck = shuffle(VERBS);
+    idx = 0; lap = 1; score = 0; streak = 0; answered = 0; correctCount = 0;
+    el.summaryView.style.display = 'none';
+    el.quizView.style.display = 'block';
+    updateStats();
+    loadCard();
+  }
+
+  function reshuffleDeck(){
+    deck = shuffle(VERBS);
+    idx = 0;
+    loadCard();
+  }
+
+  function showHint(){
+    const v = deck[idx];
+    if(!el.inputPast.value) el.inputPast.value = v[1][0];
+    if(!el.inputPP.value) el.inputPP.value = v[2][0];
+  }
+
+  el.btnCheck.addEventListener('click', checkAnswer);
+  el.btnNext.addEventListener('click', nextCard);
+  el.btnRestart.addEventListener('click', restart);
+  el.btnShuffle.addEventListener('click', reshuffleDeck);
+  el.btnHint.addEventListener('click', showHint);
+
+  [el.inputPast, el.inputPP].forEach(inp=>{
+    inp.addEventListener('keydown', e=>{
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        if(!checked) checkAnswer(); else nextCard();
+      }
+    });
+  });
+
+  loadCard();
+  updateStats();
+})();
+</script>
+
+</body>
+</html>
